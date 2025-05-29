@@ -49,8 +49,8 @@ const ProductFormPage: React.FC = () => {
           }
         } else {
           // Generate a unique barcode for new products
-          const randomBarcode = 'PROD' + Math.floor(Math.random() * 10000000).toString().padStart(8, '0');
-          setFormData(prev => ({ ...prev, barcode: randomBarcode }));
+          const barcode = db.generateBarcode();
+          setFormData(prev => ({ ...prev, barcode }));
         }
       } catch (error) {
         console.error('Error fetching data:', error);

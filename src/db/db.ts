@@ -127,7 +127,7 @@ class AppDatabase extends Dexie {
   constructor() {
     super('hayyERPDatabase');
     
-    this.version(2).stores({
+    this.version(3).stores({
       users: 'id, username, email, role, active',
       categories: 'id, name, active',
       products: 'id, name, categoryId, barcode, active',
@@ -174,18 +174,23 @@ class AppDatabase extends Dexie {
 
       // Add default categories
       const defaultCategories = [
-        'Electronics',
-        'Clothing',
-        'Groceries',
-        'Stationery',
-        'Home Appliances'
+        { name: 'Electronics', description: 'Electronic devices and accessories' },
+        { name: 'Clothing', description: 'Apparel and fashion items' },
+        { name: 'Groceries', description: 'Food and household items' },
+        { name: 'Stationery', description: 'Office and school supplies' },
+        { name: 'Home Appliances', description: 'Household appliances and equipment' },
+        { name: 'Furniture', description: 'Home and office furniture' },
+        { name: 'Health & Beauty', description: 'Personal care and beauty products' },
+        { name: 'Automotive', description: 'Vehicle parts and accessories' },
+        { name: 'Industrial Tools', description: 'Professional and industrial equipment' },
+        { name: 'Services', description: 'Professional services and maintenance' }
       ];
 
-      for (const categoryName of defaultCategories) {
+      for (const category of defaultCategories) {
         await this.categories.add({
           id: uuidv4(),
-          name: categoryName,
-          description: `${categoryName} category`,
+          name: category.name,
+          description: category.description,
           active: true,
           createdAt: new Date(),
           updatedAt: new Date()
@@ -196,6 +201,22 @@ class AppDatabase extends Dexie {
       console.error('Error initializing database:', error);
       throw error;
     }
+  }
+
+  generateBarcode(): string {
+    // Generate a unique 13-digit barcode
+    const prefix = '299'; // Custom prefix for your business
+    const random = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
+    const barcode = prefix + random;
+    
+    // Calculate check digit using modulo-10 algorithm
+    let sum = 0;
+    for (let i = 0; i < barcode.length; i++) {
+      sum += parseInt(barcode[i]) * (i % 2 === 0 ? 1 : 3);
+    }
+    const checkDigit = (10 - (sum % 10)) % 10;
+    
+    return barcode + checkDigit;
   }
 }
 
